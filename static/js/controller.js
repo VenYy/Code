@@ -19,7 +19,8 @@ function showMap() {
         url: "/showMap",
         type: "post",
         success: function (d) {
-            alert(d)
+            myChartOption.series[0].data = d.data
+            myChart.setOption(myChartOption)
         },error: function () {
             alert("ajax:地图加载失败")
         }
@@ -27,4 +28,4 @@ function showMap() {
 }
 
 screen_info()
-// showMap()
+showMap()

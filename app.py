@@ -7,6 +7,7 @@ app.config.from_object(__name__)
 db = Manager()
 spider = Spider()
 
+# 实时数据
 @app.route("/")
 def index():
     daily_info = db.get_data("area_info")
@@ -16,12 +17,26 @@ def index():
         daily_info[0]: ('台湾', 11648, 13241, 431, 1133, 460, 0, 0)
         daily_info[0][0]: 台湾
     '''
-    return render_template("index.html", data=daily_info)
+    # print(daily_info[0])
+    return render_template("index.html")
 
-@app.route('/totalData')
+@app.route("/showMap", methods=["get", "post"])
+def showMap():
+    daily_info = db.get_data("area_info")
+    result = []
+    for item in daily_info:
+        result.append({"name": item[0], "value": item[1]})
+    return jsonify({"data": result})
+
+
+# 全国历史数据
+@app.route('/totalData', methods=["get", "post"])
 def total():
     daily_info = db.get_data("area_info")
-    return render_template("totalData.html", data=daily_info)
+    result = []
+    for item in daily_info:
+        result.append({"name": item[0], "value": item[2]})
+    return jsonify({"data": [result]})
 
 @app.route("/ajax", methods=["get", "post"])
 def test():
