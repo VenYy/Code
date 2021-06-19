@@ -4,7 +4,6 @@ function checkTime(i) {
     }
       return i;
 }
-
 function startTime() {
     var today = new Date()
     var yyyy = today.getFullYear()

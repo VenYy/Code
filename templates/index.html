@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <title>疫情动态可视化</title>
     <script src="../static/js/echarts.min.js"></script>
+    <script src="../static/js/shine.js"></script>
     <script src="../static/js/china.js"></script>
     <script src="../static/js/jquery-1.12.4.js"></script>
     <script src="../static/js/showTime.js"></script>
     <script src="../static/js/controller.js"></script>
-    <script src="../static/js/showMap.js"></script>
     <link rel="stylesheet" type="text/css" href="../static/css/main.css">
 
 </head>
@@ -36,5 +36,70 @@
     <div class="right_top"></div>
     <div class="right_bottom"></div>
 
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById("main"))
+        var mapData = getData()
+
+        function getData() {
+            var legendData = []
+            var confirmedCut = []
+            var nowConfirmedCut = []
+            {% for item in data %}
+                 nowConfirmedCut.push({
+                     name: "{{ item.0 }}",
+                     value: "{{ item.1 }}"
+                 });
+                 confirmedCut.push({
+                     name: "{{ item.0 }}",
+                     value: "{{ item.2 }}"
+                 })
+            {% endfor %}
+            return {nowConfirmedCut: nowConfirmedCut, confirmedCut:confirmedCut}
+        }
+
+        var option = {
+            title: {
+                text: "今日全国疫情情况",
+            },
+            tooltip: {
+                show: true,
+                formatter: "{b}<br />{a}：{c}"
+            },
+
+            visualMap: {
+                realtime: true,         // 拖拽实时更新
+                text: ["High", "Low"],
+                inRange: {
+                    color: ["white", "green", "yellow", "red"]
+                }
+            },
+            series: [{
+                name: "当前确诊人数",
+                type: "map",
+                zoom: 1.2,
+                mapType: "china",
+                label: {
+                    show: true,
+                    fontSize: 10
+                },
+                data: mapData.nowConfirmedCut
+            }]
+        }
+
+        // 等待图形加载，1s
+        myChart.showLoading({
+              text: 'loading',
+              color: '#c23531',
+              textColor: '#000',
+              maskColor: 'rgba(255, 255, 255, 0.2)',
+              zlevel: 0,
+            })
+        setTimeout(() => {
+          // setOption前隐藏loading事件
+          myChart.hideLoading();
+          myChart.setOption(option);
+        }, 1)
+
+    </script>
 </body>
 </html>

@@ -9,19 +9,14 @@ spider = Spider()
 
 @app.route("/")
 def index():
+    daily_info = db.get_data("area_info")
     # 每日疫情信息，每次运行执行一边爬虫程序更新数据
     '''
     元组类型
         daily_info[0]: ('台湾', 11648, 13241, 431, 1133, 460, 0, 0)
         daily_info[0][0]: 台湾
     '''
-    return render_template("index.html")
-
-@app.route("/chinaMap")
-def showMap():
-    daily_info = db.get_data("area_info")
-    return daily_info
-
+    return render_template("index.html", data=daily_info)
 
 @app.route('/totalData')
 def total():
@@ -45,6 +40,4 @@ if __name__ == '__main__':
     # data = spider.spider()
     # spider.parse_data(data)
     app.run(debug=True)
-
-# aaa
 

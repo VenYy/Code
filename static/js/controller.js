@@ -14,6 +14,17 @@ function screen_info() {
     })
 }
 
-
+function showMap() {
+    $.ajax({
+        url: "/showMap",
+        type: "post",
+        success: function (d) {
+            alert(d)
+        },error: function () {
+            alert("ajax:地图加载失败")
+        }
+    })
+}
 
 screen_info()
+// showMap()
