@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>国内疫情数据</title>
+    <script src="../static/js/echarts.min.js"></script>
+    <script src="../static/js/china.js"></script>
+</head>
+<body>
+    <div id="main" style="width: 900px; height: 600px"></div>
+    <table>
+        {% for item in data %}
+            <tr>
+                <td>{{ item.0 }}</td>
+                <td>{{ item.2 }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById("main"))
+        var mapData = getData()
+
+
+        function getData() {
+            var legendData = []
+            var confirmedCut = []
+            var nowConfirmedCut = []
+            {% for item in data %}
+                 nowConfirmedCut.push({
+                     name: "{{ item.0 }}",
+                     value: "{{ item.1 }}"
+                 });
+                 confirmedCut.push({
+                     name: "{{ item.0 }}",
+                     value: "{{ item.2 }}"
+                 })
+            {% endfor %}
+            return {nowConfirmedCut: nowConfirmedCut, confirmedCut:confirmedCut}
+        }
+
+        var option = {
+            title: { text: "国内疫情地图", x: "center", y: "top" },
+            tooltip: {
+                show: true,
+                formatter: "{b}<br />{a}：{c}",
+                textStyle: {
+                    fontWeight: "bold",
+                    color: "yellow"
+                }
+            },
+            visualMap: {
+                type: "piecewise",
+                pieces: [
+                    {min: 5000},
+                    {min: 1000, max: 4999},
+                    {min: 500, max: 999},
+                    {min: 100, max: 499},
+                    {min: 10, max: 99},
+                    {min:1,max: 5}
+                ],
+                color: ['#8A0829', '#DF013A', '#FE2E64','#F78181','#F5A9A9','#FBEFEF'],
+                text: ["High", "Low"],
+            },
+            series: [{
+                name: "累积确诊人数",
+                type: "map",
+                zoom: 1,
+                mapType: "china",
+                label: {
+                    show: true,
+                    fontSize: 10
+                },
+                data: mapData.confirmedCut
+            }]
+        }
+
+        // 等待图形加载，1s
+        myChart.showLoading({
+              text: 'loading',
+              color: '#c23531',
+              textColor: '#000',
+              maskColor: 'rgba(255, 255, 255, 0.2)',
+              zlevel: 0,
+            })
+        setTimeout(() => {
+          // setOption前隐藏loading事件
+          myChart.hideLoading();
+          myChart.setOption(option);
+        }, 1)
+
+    </script>
+</body>
+</html>

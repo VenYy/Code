@@ -1,0 +1,98 @@
+body{
+    margin: 0;
+    background: #333;
+}
+a:link{ text-decoration: none; color: white }
+a:hover{ text-decoration: underline }
+a:visited{ color: #ccc }
+
+.links{
+    position: absolute;
+    width: 30%;
+    height: 10%;
+    top: 0;
+    right: 70%;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+}
+
+.title{
+    position: absolute;
+    width: 40%;
+    height: 10%;
+    top: 0;
+    left: 30%;
+    color: white;
+    font-weight: bolder;
+    font-size: 32px;
+    text-align: center;
+}
+
+#currentTime{
+    font-size: 24px;
+    color: white;
+    font-weight: bolder;
+    text-align: center;
+}
+
+.time{
+    position: absolute;
+    width: 30%;
+    height: 10%;
+    top: 0;
+    right: 0%;
+    background: green;
+    text-align: center;
+}
+
+.info{
+    position: absolute;
+    width: 40%;
+    height: 30%;
+    top: 10%;
+    left: 30%;
+    background: #777777;
+}
+
+.map{
+    position: absolute;
+    width: 40%;
+    height: 60%;
+    left: 30%;
+    top: 40%;
+    background: #888888;
+}
+
+.left_top{
+    position: absolute;
+    width: 30%;
+    height: 45%;
+    top: 10%;
+    left: 0%;
+    background: #666666;
+}
+.left_bottom{
+    position: absolute;
+    width: 30%;
+    height: 45%;
+    top: 55%;
+    left: 0%;
+    background: #666666;
+}
+.right_top{
+    position: absolute;
+    width: 30%;
+    height: 45%;
+    top: 10%;
+    right: 0%;
+    background: #777;
+}
+.right_bottom{
+    position: absolute;
+    width: 30%;
+    height: 45%;
+    top: 55%;
+    right: 0%;
+    background: #777;
+}

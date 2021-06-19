@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <title>疫情动态可视化</title>
+    <script src="../static/js/echarts.min.js"></script>
+    <script src="../static/js/china.js"></script>
+    <script src="../static/js/jquery-1.12.4.js"></script>
+    <script src="../static/js/showTime.js"></script>
+    <script src="../static/js/controller.js"></script>
+    <script src="../static/js/showMap.js"></script>
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+
+</head>
+<body>
+    <div class="links">
+        <a href="{{ url_for('total') }}" style="color: white">点击查看全国疫情统计数据</a>
+    </div>
+    <div class="title">全国疫情实时数据</div>
+    <div class="time">
+        <span id="currentTime"></span>
+    </div>
+    <div id="main" class="map"></div>
+    <div class="info">
+        <div class="num"><h1></h1></div>
+        <div class="num"><h1></h1></div>
+        <div class="num"><h1></h1></div>
+        <div class="num"><h1></h1></div>
+        <div class="txt"><h2>现存确诊</h2></div>
+        <div class="txt"><h2>累计确诊</h2></div>
+        <div class="txt"><h2>疑似病例</h2></div>
+        <div class="txt"><h2>累计死亡</h2></div>
+    </div>
+    <div class="left_top"></div>
+    <div class="left_bottom"></div>
+    <div class="right_top"></div>
+    <div class="right_bottom"></div>
+
+</body>
+</html>
