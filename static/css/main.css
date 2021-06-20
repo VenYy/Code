@@ -64,6 +64,9 @@ a:visited{ color: #ccc }
     right: 0;
     /*background: green;*/
     text-align: center;
+    font-size: 24px;
+    color: white;
+    font-weight: bolder;
 }
 
 .info{

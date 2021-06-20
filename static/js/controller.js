@@ -1,3 +1,16 @@
+// 展示当前时间
+function showTime() {
+    $.ajax({
+        url: "/showTime",
+        timeout: 10000, //超时时间设置为10秒；
+        success: function (data) {
+            $(".time").html(data)
+        },
+        error: function (xhr, type, errorThrown) {
+        }
+    });
+
+}
 function screen_info() {
     $.ajax({
         url: "/screen_info",
@@ -21,11 +34,15 @@ function showMap() {
         success: function (d) {
             myChartOption.series[0].data = d.data
             myChart.setOption(myChartOption)
-        },error: function () {
-            alert("ajax:地图加载失败")
+        },error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert(XMLHttpRequest.status)
+            alert(XMLHttpRequest.readyState)
+            alert(textStatus)
         }
     })
 }
 
+showTime()
 screen_info()
 showMap()
+setInterval(showTime, 1000)

@@ -1,4 +1,7 @@
+import traceback
+import threading
 import pymysql
+from pymysql import cursors
 
 DB_INFO = {
     "host": "127.0.0.1",
@@ -11,6 +14,7 @@ DB_INFO = {
 
 
 class Manager(object):
+    # 连接数据库
     def __init__(self):
         self.conn = pymysql.connect(host=DB_INFO["host"],
                                     user=DB_INFO["user"],
@@ -21,9 +25,29 @@ class Manager(object):
                                     )
 
         self.cursor = self.conn.cursor()
+        self.lock = threading.Lock()
 
-    def insert2province(self, countryName, provinceShortName, currentConfirmedCount, suspectedCount, curedCount, deadCount):
-        sql = 'replace into province_info values ("%s", "%s", "%d", "%d", "%d", "%d")' % (countryName, provinceShortName, int(currentConfirmedCount), int(suspectedCount), int(curedCount), int(deadCount))
+    # 释放资源
+    def connClose(self):
+        self.cursor.close()
+        self.conn.close()
+
+    # 执行sql
+    def executeSql(self, sql):
+        # 每个execute前加上互斥锁
+        self.lock.acquire()
+        self.cursor.execute(sql)
+        self.lock.release()
+        data = self.cursor.fetchall()
+        # self.connClose()
+        return data
+
+    # 插入实时数据
+    def insert2areaInfo(self, provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount,
+                        deadCount, highDangerCount, midDangerCount):
+        sql = 'replace into area_info values("%s", "%d", "%d", "%d", "%d", "%d", "%d", "%d")' % (
+            provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount, deadCount, highDangerCount,
+            midDangerCount)
         try:
             if self.cursor.execute(sql):
                 self.conn.commit()
@@ -32,8 +56,12 @@ class Manager(object):
             print("插入数据失败")
             self.conn.rollback()
 
-    def insert2areaInfo(self, provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount, deadCount, highDangerCount, midDangerCount):
-        sql = 'replace into area_info values("%s", "%d", "%d", "%d", "%d", "%d", "%d", "%d")' % (provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount, deadCount, highDangerCount, midDangerCount)
+    # 插入历史总数据
+    def insert2province(self, countryName, provinceShortName, currentConfirmedCount, suspectedCount, curedCount,
+                        deadCount):
+        sql = 'replace into province_info values ("%s", "%s", "%d", "%d", "%d", "%d")' % (
+            countryName, provinceShortName, int(currentConfirmedCount), int(suspectedCount), int(curedCount),
+            int(deadCount))
         try:
             if self.cursor.execute(sql):
                 self.conn.commit()
@@ -41,16 +69,15 @@ class Manager(object):
         except:
             print("插入数据失败")
             self.conn.rollback()
+
+    # 获取大屏需要展示的信息
+    def get_info(self, args):
+        sql = f"SELECT SUM(currentConfirmedCount), SUM(confirmedCount), SUM(suspectedCount), SUM(deadCount) FROM {args}"
+        data = self.executeSql(sql)
+        return data[0]
 
     def get_data(self, args):
         sql = f"select * from {args}"
-        self.cursor.execute(sql)
-        data = self.cursor.fetchall()
+        data = self.executeSql(sql)
         return data
 
-    # 获取大屏info数据
-    def get_info(self, args):
-        sql = f"SELECT SUM(currentConfirmedCount), SUM(confirmedCount), SUM(suspectedCount), SUM(deadCount) FROM {args}"
-        self.cursor.execute(sql)
-        data = self.cursor.fetchall()
-        return data[0]
