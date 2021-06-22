@@ -104,3 +104,4 @@ if __name__ == '__main__':
         data = spider.crawl()
         parse_dxy(data)
         time.sleep(600)  # 每十分钟重新获取一次数据
+        # test
