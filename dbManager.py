@@ -42,26 +42,7 @@ class Manager(object):
         # self.connClose()
         return data
 
-    # 插入实时数据
-    def insert2areaInfo(self, provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount,
-                        deadCount, highDangerCount, midDangerCount):
-        sql = 'replace into area_info values("%s", "%d", "%d", "%d", "%d", "%d", "%d", "%d")' % (
-            provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount, deadCount, highDangerCount,
-            midDangerCount)
-        try:
-            if self.cursor.execute(sql):
-                self.conn.commit()
-                print("插入数据成功")
-        except:
-            print("插入数据失败")
-            self.conn.rollback()
-
-    # 插入历史总数据
-    def insert2province(self, countryName, provinceShortName, currentConfirmedCount, suspectedCount, curedCount,
-                        deadCount):
-        sql = 'replace into province_info values ("%s", "%s", "%d", "%d", "%d", "%d")' % (
-            countryName, provinceShortName, int(currentConfirmedCount), int(suspectedCount), int(curedCount),
-            int(deadCount))
+    def submit(self, sql):
         try:
             if self.cursor.execute(sql):
                 self.conn.commit()
@@ -81,6 +62,3 @@ class Manager(object):
         sql = f"select * from {args}"
         data = self.executeSql(sql)
         return data
-
-
-

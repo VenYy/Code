@@ -7,47 +7,42 @@ import time
 from dbManager import Manager
 
 # URL = "https://lab.isaaclin.cn/nCoV/api/area"
-URL = "https://ncov.dxy.cn/ncovh5/view/pneumonia"
-USER_AGENT_LIST = [
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 '
-    'Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:73.0) Gecko/20100101 Firefox/73.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 '
-    'Safari/605.1.15',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 '
-    'Safari/537.36 Edge/16.16299',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
-]
+url = "https://ncov.dxy.cn/ncovh5/view/pneumonia"
+headers = {
+    "UserAgent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 '
+    'Safari/537.36'
+}
 db = Manager()
 
 
-class Spider(object):
 
-    def __init__(self):
-        # self.db = Manager()
-        # requests.session() 跨请求时保持某些参数
-        self.session = requests.session()
-        self.url = URL
+def change_proxy():
+    useful_proxy = []
+    with open("proxy_list.txt", "w") as f:
+        for line in f.readlines():
+            proxy = line.strip("\n")
+            if requests.get(proxy).status_code == 200:
+                proxy_support = {
+                    "http": proxy
+                }
+                useful_proxy.append(proxy_support)
+    return useful_proxy
 
-    def crawl(self):
-        self.session.headers.update({
-            "user-agent": random.choice(USER_AGENT_LIST)
-        })
-        try:
-            req = self.session.get(url=self.url)
-            print(req.status_code)
-            element = req.content.decode("utf-8")
-        except RequestException as e:
-            print(f"Connection Failed, {e}")
 
-        data = html.etree.HTML(element)
+def crawl():
+    try:
+        req = requests.get(url, headers=headers)
+        print(req.status_code)
+        page = req.content.decode("utf-8")
+        data = html.etree.HTML(page)
         return data
+    except RequestException as e:
+        print(f"Connection Failed, {e}")
 
-    '''
-    解析丁香园*https://ncov.dxy.cn/ncovh5/view/pneumonia*提供的当天国内国内数据
-    解析数据并存入mysql数据库 infos.area_info 中
-    '''
+'''
+解析丁香园*https://ncov.dxy.cn/ncovh5/view/pneumonia*提供的当天国内国内数据
+解析数据并存入mysql数据库 infos.area_info 中
+'''
 def parse_dxy(data):
     _ = data.xpath("//script[@id='getAreaStat']/text()")[0][27: -11]
     areaInfo = json.loads(_)
@@ -64,15 +59,35 @@ def parse_dxy(data):
         highDangerCount = areaInfo[i]["highDangerCount"]  # 高风险地区数
         midDangerCount = areaInfo[i]["midDangerCount"]  # 中风险地区数
         dangerAreas = areaInfo[i]["dangerAreas"]  # 风险地区列表
-        # if data[i]["cities"][0]:
-        #     commentName = data[i]["cities"][0]["cityName"]
-        #     comment = data[i]["cities"][0]["currentConfirmedCount"]
-        db.insert2areaInfo(provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount,
-                           deadCount, highDangerCount, midDangerCount)
+
+        # 插入实时数据
+        sql1 = 'replace into area_info values("%s", "%d", "%d", "%d", "%d", "%d", "%d", "%d")' % (
+            provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount, deadCount, highDangerCount,
+            midDangerCount)
+        db.submit(sql1)
+
+        citiesNameList = []
+        citiesDataList = []
+
+        if len(areaInfo[i]["cities"]) > 1:
+            for j in range(len(areaInfo[i]["cities"])):
+                citiesName = areaInfo[i]["cities"][j]["cityName"]
+                citiesData = areaInfo[i]["cities"][j]["currentConfirmedCount"]
+                citiesNameList.append(citiesName)
+                citiesDataList.append(citiesData)
+
+        for n, d in zip(citiesNameList, citiesDataList):
+            # print(n, d)
+            sql2 = "replace into cities_info values ('%s', '%s', '%d')" % (provinceName, n, d)
+            db.submit(sql2)
+        # print(citiesName, citiesDict)
+        # 广东
+        # {'广州': 156, '深圳': 45, '佛山': 19, '珠海': 7, '东莞': 4, '湛江': 3, '中山': 2, '江门': 2, '肇庆': 1, '惠州': 0, '汕头': 0, '梅州': 0,
+        #  '茂名': 0, '阳江': 0, '清远': 0, '揭阳': 0, '韶关': 0, '潮州': 0, '汕尾': 0, '河源': 0, '待明确地区': -18}
 
 
 # 解析自*https://lab.isaaclin.cn/nCoV/*提供的api
-def parse_data(self, data):
+def parse_data(data):
     # dict = {}
     for i in range(len(data)):
         countryName = data[i]["countryName"]  # 国家名称
@@ -81,8 +96,6 @@ def parse_data(self, data):
         suspectedCount = data[i]["suspectedCount"]  # 疑似确诊人数
         curedCount = data[i]["curedCount"]  # 治愈人数
         deadCount = data[i]["curedCount"]  # 死亡人数
-
-
 
 
         # dict["countryName"] = countryName
@@ -94,14 +107,16 @@ def parse_data(self, data):
         #
         # print(dict)
         # 全球城市数据存入数据库
-        db.insert2province(countryName, provinceShortName, currentConfirmedCount, suspectedCount, curedCount,
-                           deadCount)
+
+        sql = 'replace into province_info values ("%s", "%s", "%d", "%d", "%d", "%d")' % (
+            countryName, provinceShortName, int(currentConfirmedCount), int(suspectedCount), int(curedCount),
+            int(deadCount))
+        db.submit(sql)
 
 
 if __name__ == '__main__':
-    spider = Spider()
     while True:
-        data = spider.crawl()
+        data = crawl()
         parse_dxy(data)
         time.sleep(600)  # 每十分钟重新获取一次数据
         # test

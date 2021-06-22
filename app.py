@@ -2,12 +2,10 @@ import time
 
 from flask import Flask, render_template, jsonify
 from dbManager import Manager
-from spider import Spider
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 db = Manager()
-spider = Spider()
 
 
 @app.route("/")
