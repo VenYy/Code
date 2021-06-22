@@ -64,6 +64,9 @@ def parse_dxy(data):
         highDangerCount = areaInfo[i]["highDangerCount"]  # 高风险地区数
         midDangerCount = areaInfo[i]["midDangerCount"]  # 中风险地区数
         dangerAreas = areaInfo[i]["dangerAreas"]  # 风险地区列表
+        # if data[i]["cities"][0]:
+        #     commentName = data[i]["cities"][0]["cityName"]
+        #     comment = data[i]["cities"][0]["currentConfirmedCount"]
         db.insert2areaInfo(provinceName, currentConfirmedCount, confirmedCount, suspectedCount, curedCount,
                            deadCount, highDangerCount, midDangerCount)
 
@@ -78,6 +81,9 @@ def parse_data(self, data):
         suspectedCount = data[i]["suspectedCount"]  # 疑似确诊人数
         curedCount = data[i]["curedCount"]  # 治愈人数
         deadCount = data[i]["curedCount"]  # 死亡人数
+
+
+
 
         # dict["countryName"] = countryName
         # dict["provinceShortName"] = provinceShortName

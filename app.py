@@ -32,15 +32,6 @@ def showMap():
     return jsonify({"data": result})
 
 
-# 全国历史数据
-# @app.route('/totalData', methods=["get", "post"])
-# def total():
-#     daily_info = db.get_data("area_info")
-#     result = []
-#     for item in daily_info:
-#         result.append({"name": item[0], "value": item[2]})
-#     return jsonify({"data": [result]})
-
 
 @app.route("/screen_info", methods=["get", "post"])
 def screen_info():

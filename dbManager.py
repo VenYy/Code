@@ -34,7 +34,7 @@ class Manager(object):
 
     # 执行sql
     def executeSql(self, sql):
-        # 每个execute前加上互斥锁
+        # 每个execute前加上互斥锁，防止多个线程同时执行造成的异常
         self.lock.acquire()
         self.cursor.execute(sql)
         self.lock.release()
@@ -74,10 +74,13 @@ class Manager(object):
     def get_info(self, args):
         sql = f"SELECT SUM(currentConfirmedCount), SUM(confirmedCount), SUM(suspectedCount), SUM(deadCount) FROM {args}"
         data = self.executeSql(sql)
+        # print(data)
         return data[0]
 
     def get_data(self, args):
         sql = f"select * from {args}"
         data = self.executeSql(sql)
         return data
+
+
 

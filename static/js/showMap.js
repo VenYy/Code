@@ -13,7 +13,7 @@ var myChartOption = {
         realtime: true,         // 拖拽实时更新
         text: ["High", "Low"],
         inRange: {
-            color: ["white", "green", "yellow", "red"]
+            color: ["white", "yellow", "red"]
         }
     },
     series: [{

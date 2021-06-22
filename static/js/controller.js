@@ -45,4 +45,7 @@ function showMap() {
 showTime()
 screen_info()
 showMap()
+// 十分钟更新一次
 setInterval(showTime, 1000)
+setInterval(screen_info, 1000*60*10)
+setInterval(showMap, 1000*60*10)
