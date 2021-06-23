@@ -18,9 +18,10 @@ db = Manager()
 
 def change_proxy():
     useful_proxy = []
-    with open("proxy_list.txt", "w") as f:
+    with open("proxy_list.txt", "r") as f:
         for line in f.readlines():
             proxy = line.strip("\n")
+            print(proxy)
             if requests.get(proxy).status_code == 200:
                 proxy_support = {
                     "http": proxy
@@ -28,6 +29,7 @@ def change_proxy():
                 useful_proxy.append(proxy_support)
     return useful_proxy
 
+# print(change_proxy())
 
 def crawl():
     try:
@@ -47,6 +49,8 @@ def parse_dxy(data):
     _ = data.xpath("//script[@id='getAreaStat']/text()")[0][27: -11]
     areaInfo = json.loads(_)
     # print(areaInfo)
+    time_str = time.strftime("%Y-%m-%d_%X")
+    # print(time_str)
     for i in range(len(areaInfo)):
         provinceName = areaInfo[i]["provinceShortName"]  # 省份名称
         # print(provinceName)
@@ -78,7 +82,7 @@ def parse_dxy(data):
 
         for n, d in zip(citiesNameList, citiesDataList):
             # print(n, d)
-            sql2 = "replace into cities_info values ('%s', '%s', '%d')" % (provinceName, n, d)
+            sql2 = "replace into cities_info values ('%s', '%s', '%s', '%d')" % (time_str, provinceName, n, d)
             db.submit(sql2)
         # print(citiesName, citiesDict)
         # 广东
@@ -119,4 +123,3 @@ if __name__ == '__main__':
         data = crawl()
         parse_dxy(data)
         time.sleep(600)  # 每十分钟重新获取一次数据
-        # test

@@ -1,7 +1,5 @@
-import traceback
 import threading
 import pymysql
-from pymysql import cursors
 
 DB_INFO = {
     "host": "127.0.0.1",
@@ -47,8 +45,8 @@ class Manager(object):
             if self.cursor.execute(sql):
                 self.conn.commit()
                 print("插入数据成功")
-        except:
-            print("插入数据失败")
+        except Exception as e:
+            print("插入数据失败", e)
             self.conn.rollback()
 
     # 获取大屏需要展示的信息
