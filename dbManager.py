@@ -48,6 +48,7 @@ class Manager(object):
         except Exception as e:
             print("插入数据失败", e)
             self.conn.rollback()
+        # self.connClose()
 
     # 获取大屏需要展示的信息
     def get_info(self, args):
@@ -58,5 +59,11 @@ class Manager(object):
 
     def get_data(self, args):
         sql = f"select * from {args}"
+        data = self.executeSql(sql)
+        return data
+
+    # left_top
+    def get_left_top(self):
+        sql = "SELECT provinceName, citiesName, citiesData from cities_info ORDER BY time desc, citiesData desc limit 10"
         data = self.executeSql(sql)
         return data

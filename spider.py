@@ -10,10 +10,9 @@ from dbManager import Manager
 url = "https://ncov.dxy.cn/ncovh5/view/pneumonia"
 headers = {
     "UserAgent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 '
-    'Safari/537.36'
+                 'Safari/537.36'
 }
 db = Manager()
-
 
 
 def change_proxy():
@@ -29,6 +28,7 @@ def change_proxy():
                 useful_proxy.append(proxy_support)
     return useful_proxy
 
+
 # print(change_proxy())
 
 def crawl():
@@ -41,15 +41,18 @@ def crawl():
     except RequestException as e:
         print(f"Connection Failed, {e}")
 
+
 '''
 解析丁香园*https://ncov.dxy.cn/ncovh5/view/pneumonia*提供的当天国内国内数据
 解析数据并存入mysql数据库 infos.area_info 中
 '''
+
+
 def parse_dxy(data):
     _ = data.xpath("//script[@id='getAreaStat']/text()")[0][27: -11]
     areaInfo = json.loads(_)
     # print(areaInfo)
-    time_str = time.strftime("%Y-%m-%d_%X")
+    time_str = time.strftime("%Y%m%d%H%M%S")
     # print(time_str)
     for i in range(len(areaInfo)):
         provinceName = areaInfo[i]["provinceShortName"]  # 省份名称
@@ -73,16 +76,24 @@ def parse_dxy(data):
         citiesNameList = []
         citiesDataList = []
 
-        if len(areaInfo[i]["cities"]) > 1:
+        # 执行插入数据库操作时，含有部分cities为空的项，以此需要将此项添加进去
+        # if len(areaInfo[i]["cities"]) == 0:
+        #     # print(areaInfo[i]["provinceShortName"])
+        #     citiesNameList.append(areaInfo[i]["provinceShortName"])
+        #     citiesDataList.append(areaInfo[i]["currentConfirmedCount"])
+        if provinceName == "香港" or provinceName == "澳门" or provinceName == "台湾":
+            continue
+        else:
             for j in range(len(areaInfo[i]["cities"])):
                 citiesName = areaInfo[i]["cities"][j]["cityName"]
                 citiesData = areaInfo[i]["cities"][j]["currentConfirmedCount"]
                 citiesNameList.append(citiesName)
                 citiesDataList.append(citiesData)
 
+        # 插入的时间格式 %Y%m%d%H%M%S 20210623122420，执行查询操作时需排序选取
         for n, d in zip(citiesNameList, citiesDataList):
             # print(n, d)
-            sql2 = "replace into cities_info values ('%s', '%s', '%s', '%d')" % (time_str, provinceName, n, d)
+            sql2 = "insert into cities_info values ('%s', '%s', '%s', '%d')" % (time_str, provinceName, n, d)
             db.submit(sql2)
         # print(citiesName, citiesDict)
         # 广东
@@ -100,7 +111,6 @@ def parse_data(data):
         suspectedCount = data[i]["suspectedCount"]  # 疑似确诊人数
         curedCount = data[i]["curedCount"]  # 治愈人数
         deadCount = data[i]["curedCount"]  # 死亡人数
-
 
         # dict["countryName"] = countryName
         # dict["provinceShortName"] = provinceShortName
