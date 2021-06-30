@@ -31,7 +31,7 @@ class Manager(object):
         self.conn.close()
 
     # 执行sql
-    def executeSql(self, sql):
+    def query(self, sql):
         # 每个execute前加上互斥锁，防止多个线程同时执行造成的异常
         self.lock.acquire()
         self.cursor.execute(sql)
@@ -40,7 +40,7 @@ class Manager(object):
         # self.connClose()
         return data
 
-    def submit(self, sql):
+    def insertData(self, sql):
         try:
             if self.cursor.execute(sql):
                 self.conn.commit()
@@ -51,19 +51,35 @@ class Manager(object):
         # self.connClose()
 
     # 获取大屏需要展示的信息
-    def get_info(self, args):
-        sql = f"SELECT SUM(currentConfirmedCount), SUM(confirmedCount), SUM(suspectedCount), SUM(deadCount) FROM {args}"
-        data = self.executeSql(sql)
+    def get_info(self):
+        sql = "SELECT SUM(currentConfirmedCount), SUM(confirmedCount), SUM(suspectedCount), SUM(deadCount) FROM area_info where updateTime=(select updateTime from area_info order by updateTime desc limit 1)"
+        data = self.query(sql)
         # print(data)
         return data[0]
 
-    def get_data(self, args):
-        sql = f"select * from {args}"
-        data = self.executeSql(sql)
+    # 展示地图需要的数据，取时间戳最新的一组数据
+    def get_data(self):
+        sql = "SELECT * FROM area_info WHERE updateTime =( SELECT updateTime FROM area_info ORDER BY updateTime DESC LIMIT 1 );"
+        data = self.query(sql)
         return data
 
-    # left_top
-    def get_left_top(self):
-        sql = "SELECT provinceName, citiesName, citiesData from cities_info ORDER BY time desc, citiesData desc limit 10"
-        data = self.executeSql(sql)
+    def leftData(self):
+        sql = "select * from history_data order by dateId desc"
+        data = self.query(sql)
+        dateIdList = []
+        for i in data:
+            dateId = str(i[0])
+            year, month, day = dateId[:4], dateId[4:6], dateId[6:8]
+            time_str = f"{year}-{month}-{day}"
+            dateIdList.append(time_str)
+        return data, dateIdList
+
+    def rightTop_data(self):
+        sql = "select citiesName, citiesData from cities_info where(provinceName='广东') order by updateTime desc, citiesData desc limit 8"
+        data = self.query(sql)
+        return data
+
+    def rightCenter_data(self):
+        sql = "select countryName, currentConfirmedCount, confirmedCount, curedCount, deadCount from country_info order by updateTime desc, confirmedCount desc limit 10"
+        data = self.query(sql)
         return data

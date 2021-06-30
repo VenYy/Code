@@ -2,6 +2,7 @@ import time
 
 from flask import Flask, render_template, jsonify
 from dbManager import Manager
+import historyData
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -21,43 +22,85 @@ def index():
     daily_info[0]: ('台湾', 11648, 13241, 431, 1133, 460, 0, 0)
     daily_info[0][0]: 台湾
 '''
-@app.route("/showMap", methods=["get", "post"])
+@app.route("/api/showMap", methods=["get", "post"])
 def showMap():
-    daily_info = db.get_data("area_info")
+    daily_info = db.get_data()
     # print(daily_info)
-    result = []
+    currentConfirmed = []
+    sumConfirmed = []
+
     for item in daily_info:
-        result.append({"name": item[0], "value": item[1]})
-    return jsonify({"data": result})
+        currentConfirmed.append({"name": item[1], "value": item[3]})
+        sumConfirmed.append({"name": item[1], "value": item[4]})
+    return jsonify({"data": currentConfirmed}, {"data": sumConfirmed})
 
 
 # 功能：数字屏幕
-@app.route("/screen_info", methods=["get", "post"])
+@app.route("/api/screen_info", methods=["get", "post"])
 def screen_info():
-    data = db.get_info("area_info")
-    # print(data[0][0])
+    data = db.get_info()
+    # print(data)
     # (Decimal('12370'), Decimal('116853'), Decimal('1868'), Decimal('5324'))
     return jsonify({"nowConfirmed": int(data[0]), "confirmed": int(data[1]), "suspected": int(data[2]), "dead": int(data[3])})
 
 # 功能：时间显示
-@app.route("/showTime")
+@app.route("/api/showTime", methods=["get", "post"])
 def show_time():
-    time_str = time.strftime("{}%Y{}%m{}%d{} %X")
-    return time_str.format("数据更新时间：", "年", "月", "日")
+    time_str = time.strftime("%Y{}%m{}%d{} %X").format("年", "月", "日")
+    return time_str
 
-# 功能：left_top显示当前确诊人数最多的前几个城市
-@app.route("/leftTop")
+# 全国新增确诊%全国新增死亡
+@app.route("/api/leftTop", methods=["get", "post"])
 def left_top():
-    datas = db.get_left_top()
-    data = []
+    data, dateIdList = db.leftData()
     # print(data)
-    # (('广东', '广州', 134), ('上海', '境外输入k ', 55), ('福建', '境外输入人员', 46), ('浙江', '境外输入', 45), ('广东', '深圳', 44), ('四川', '成都', 42),
-    # ('云南', '境外输入', 41), ('北京', '境外输入', 28), ('广东', '佛山', 19), ('江苏', '境外输入', 14))
-    for item in datas:
-        data.append({"provinceName": item[0], "citiesName": item[1], "citiesData": item[2]})
-    return jsonify({"data": data})
+    confirmedIncrList = []
+    curedIncrList = []
+    deadIncrList = []
+    for i in data:
+        confirmedIncr = i[2]
+        curedIncr = i[8]
+        deadIncr = i[6]
+        confirmedIncrList.append(confirmedIncr)
+        deadIncrList.append(deadIncr)
+        curedIncrList.append(curedIncr)
+    return jsonify({"dateId": dateIdList[::-1], "confirmedIncr": confirmedIncrList[::-1], "deadIncr": deadIncrList[::-1], "curedIncr": curedIncrList[::-1]})
+
+# 全国累计确诊&全国累计治愈
+@app.route("/api/leftBottom", methods=["get", "post"])
+def left_bottom():
+    data, dateIdList = db.leftData()
+    confirmedCountList = []
+    curedCountList = []
+    deadCountList =[]
+    for i in data:
+        confirmedCount = i[1]
+        curedCount = i[7]
+        deadCount = i[5]
+        confirmedCountList.append(confirmedCount)
+        curedCountList.append(curedCount)
+        deadCountList.append(deadCount)
+
+    return jsonify({"dateId": dateIdList[::-1], "confirmedCount": confirmedCountList[::-1], "curedCount": curedCountList[::-1], "deadCount": deadCountList[::-1]})
 
 
+@app.route("/api/rightTop", methods=["get", "post"])
+def right_top():
+    data = db.rightTop_data()
+    rightTopData = []
+    for item in data:
+        rightTopData.append({"name": item[0], "value": item[1]})
+    # print(rightTopData)
+    return jsonify({"data": rightTopData})
+
+@app.route("/api/rightCenter", methods=["get", "post"])
+def right_center():
+    data = db.rightCenter_data()
+    # print(data)
+    rightCenterData = []
+    for item in data:
+        rightCenterData.append({"countryName": item[0], "currentConfirmedCount": item[1], "confirmedCount": item[2], "curedCount": item[3], "deadCount": item[4]})
+    return jsonify({"data": rightCenterData})
 
 if __name__ == '__main__':
     # spider = Spider()
