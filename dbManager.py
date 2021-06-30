@@ -83,3 +83,8 @@ class Manager(object):
         sql = "select countryName, currentConfirmedCount, confirmedCount, curedCount, deadCount from country_info order by updateTime desc, confirmedCount desc limit 10"
         data = self.query(sql)
         return data
+
+    def rightBottom_data(self):
+        sql = "select updateTime, totalVaccineTrend from vaccinetrend_data  where(countryName='中国') order by updateTime asc"
+        data = self.query(sql)
+        return data

@@ -1,7 +1,7 @@
 body {
     margin: 0;
     /*background-color: dimgray;*/
-    background: url("../images/bg.jpg") no-repeat;
+    background: url("../images/bg.png") no-repeat center;
     background-size: auto;
 
     /*// 禁止文字被鼠标选中 */
@@ -38,10 +38,12 @@ body {
 
 .right {
     position: absolute;
-    width: 90%;
-    height: 90%;
+    width: 95%;
+    height: 95%;
     top: 5%;
-    right: 5%;
+
+    /*right: 5%;*/
+    padding-left: 5%;
 
 }
 
@@ -187,15 +189,24 @@ a:visited {
 
 }
 
-.right_bottom {
+.right_center {
     position: absolute;
     width: 28%;
-    height: 60%;
+    height: 30%;
     top: 40%;
     right: 0;
     margin-right: 1%;
     background: url("../images/barbg.png") no-repeat;
     background-size: 100% 100%;
 }
-
+.right_bottom {
+    position: absolute;
+    width: 28%;
+    height: 28%;
+    top: 70%;
+    right: 0;
+    margin-right: 1%;
+    background: url("../images/barbg.png") no-repeat;
+    background-size: 100% 100%;
+}
 

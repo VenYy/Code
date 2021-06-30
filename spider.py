@@ -31,7 +31,7 @@ def change_proxy():
 
 # print(change_proxy())
 
-def crawl():
+def crawl(url):
     try:
         req = requests.get(url, headers=headers)
         print(req.status_code)
@@ -109,9 +109,30 @@ def parse_country_data(data):
         db.insertData(sql)
 
 
+# 各国（地区）疫苗累计接种趋势
+def get_vaccineTrendData():
+    url = "https://api.inews.qq.com/newsqa/v1/automation/modules/list?modules=VaccineTrendData"
+    data = json.loads(requests.get(url, headers=headers).text)
+    data = data["data"]["VaccineTrendData"]["totalTrend"]
+    # print(data)
+    for countryName in data:
+        detailData = data[countryName]
+        for item in detailData:
+            # print(item)
+            updateTime = int(item["y"] + item["date"].replace(".", ""))
+            # print(updateTime)
+            totalVaccination = item["total_vaccinations"]
+            # print(countryName, updateTime, totalVaccination)
+            sql = "insert into vaccinetrend_data values ('%s', '%d', '%d')" % (countryName, updateTime, totalVaccination)
+            db.insertData(sql)
+
+
+
+
 if __name__ == '__main__':
     while True:
-        data = crawl()
-        parse_dxy(data)
-        parse_country_data(data)
+        # data = crawl(url)
+        # parse_dxy(data)
+        # parse_country_data(data)
+        get_vaccineTrendData()
         time.sleep(3600)  # 每一小时重新获取一次数据

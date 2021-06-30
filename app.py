@@ -102,6 +102,24 @@ def right_center():
         rightCenterData.append({"countryName": item[0], "currentConfirmedCount": item[1], "confirmedCount": item[2], "curedCount": item[3], "deadCount": item[4]})
     return jsonify({"data": rightCenterData})
 
+@app.route("/api/rightBottom", methods=["get", "post"])
+def right_bottom():
+    data =db.rightBottom_data()
+    # print(data)
+    res = []
+    updateTimeList = []
+    totalDataList = []
+    for i in data:
+        updateTime = str(i[0])
+        year, month, day = updateTime[:4], updateTime[4:6], updateTime[6:8]
+        timeStr = f"{year}-{month}-{day}"
+        totalData = i[1]
+        # totalData = int(totalData/100000000)
+        updateTimeList.append(timeStr)
+        totalDataList.append(totalData)
+        # res.append({"updateTime": updateTime, "totalData": totalData})
+    # print(res)
+    return jsonify({"updateTime": updateTimeList, "totalData": totalDataList})
 if __name__ == '__main__':
     # spider = Spider()
     # data = spider.spider()
